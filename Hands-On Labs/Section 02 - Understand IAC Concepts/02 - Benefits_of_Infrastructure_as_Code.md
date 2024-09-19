@@ -336,6 +336,29 @@ resource "aws_nat_gateway" "nat_gateway" {
 
 Now that we have our Terraform files ready to go, the last step we need to complete is setting a few environment variables to set our AWS credentials and region used by Terraform. In AWS, generate an access key and secret key from an IAM user with Administrative privileges. If you need help, [check out this link with a walk-through](https://aws.amazon.com/premiumsupport/knowledge-center/create-access-key/).
 
+We will set our credentials up together in Datacouch Virtual machines with the command `aws configure`.
+
+1. First off, we will setup a virtual machine which comes with a lot of software including the AWS CLI, Helm, Terraform, Minikube, and Docker.
+Open an incognito window in Chrome, and navigate to `https://labs.datacouch.io/pluralsight/`.  Be sure to `allow` the clipboard access when asked so that you can copy between your host machine and the virtual machine. 
+
+2. Log in to the virtual machine with credentials from the instructor.
+
+3.  Next, we will authenticate the VM with our AWS credentials so that it can communicate with our AWS accounts. Open up a terminal window and then type `aws configure`.  Then it will prompt you for an access key and secret access - the instructor will provide those things.  After, it will ask you for the region, which is `us-west-2` and then output format, which is `json`.
+
+**Please be sure to store your aws access keys somewhere locally like notepad - you never want to store your aws keys in a public place like Github**
+
+4. Now, we have authenticated, but how do we validate that it actually worked?  For this you can run:
+
+```shell
+aws sts get-caller-identity
+```
+
+This command will tell you if you have successfully authenticated and will respond with a JSON response with your AWS id.
+
+
+
+<!--
+
 Once you have credentials, set the following environment variables for Linux, MacOS, or Bash on Windows:
 
 ```shell
@@ -356,6 +379,7 @@ C:\> setx AWS_SECRET_ACCESS_KEY <YOUR SECRET KEY>
 ```
 
 [More information on setting credentials for AWS can be found here](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html)
+-->
 
 ## Task 9: Deploy the AWS infrastructure using Terraform
 
