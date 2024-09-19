@@ -23,7 +23,7 @@ You have been tasked with deploying some basic infrastructure on AWS to host a p
 - **Task 9:** Deploy the AWS infrastructure using Terraform
 - **Task 10:** Delete the AWS resources using Terraform to clean up our AWS environment
 
-The end state of the AWS environment should look similar to the following diagram:
+The end state of the AWS environment should look similar to the following diagram - note that we will be deploying to the `us-west-2` region instead of `us-east-1`:
 
 ![Desired Infrastructure](./img/obj-1-desired-infrastructure.png)
 
