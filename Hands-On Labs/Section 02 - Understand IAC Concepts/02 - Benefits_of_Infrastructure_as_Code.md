@@ -175,7 +175,11 @@ On your workstation, just create a new directory `mkdir lab1`. This is where we'
 
 Go ahead and create a new file called `main.tf` and `variables.tf`.
 
-In the `variables.tf`, copy the following variable definitions and save the file. Don't worry about understanding everything just yet, we'll learn all about variables in Objective 3.
+In the `variables.tf`, copy the following variable definitions and save the file.
+
+Under `vpc_name` go ahead and change the name to something unique with your initials (but try to keep it short) so that you can identify it as we are in a shared account.
+
+Don't worry about understanding everything just yet, we'll learn all about variables in Objective 3.
 
 ```hcl
 variable "aws_region" {
