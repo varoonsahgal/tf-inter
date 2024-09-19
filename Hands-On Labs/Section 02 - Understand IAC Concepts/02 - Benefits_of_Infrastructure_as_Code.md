@@ -171,7 +171,9 @@ Prior to deleting the VPC, you must first delete the NAT gateway. Select NAT Gat
 
 ### **Step 7.1**
 
-On your workstation, navigate to the `/workstation/terraform` directory. This is where we'll do all of our work for this training. Create a new file called `main.tf` and `variables.tf`.
+On your workstation, just create a new directory `mkdir lab1`. This is where we'll do all of our work for this lab - when we do new labs, just create a new directory to make it easier to manage everything.
+
+Go ahead and create a new file called `main.tf` and `variables.tf`.
 
 In the `variables.tf`, copy the following variable definitions and save the file. Don't worry about understanding everything just yet, we'll learn all about variables in Objective 3.
 
