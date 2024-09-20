@@ -68,6 +68,40 @@ Update the `version` line within your `terraform.tf` file to try these different
       version = "~> 3.0"
 ```
 
+# Terraform versioning
+
+Whenever you see a TF version, it will look something like 1.5.2... this uses a MAJOR.MINOR.PATCH (e.g., 1.5.2) versioning system, where each of those means:
+
+- Major: Significant changes, potentially breaking backward compatibility.
+- Minor: New features, backward-compatible enhancements.
+- Patch: Bug fixes and minor improvements that do not change functionality.
+
+
+# Pessimistic Constraint (~>)
+The `~>` is often referred to as the "pessimistic" operator, this allows updates within a specified range that maintains compatibility by locking the major (or major and minor) version.
+
+ It is called a pessimistic constraint because it sets conservative (or cautious) boundaries on the acceptable versions of a provider, aiming to avoid potential breaking changes while still allowing minor, non-breaking updates.
+
+
+Example:
+
+```
+version = "~> 3.45.0"
+```
+
+This allows versions >= 3.45.0 but < 3.46.0, essentially allowing only patch updates.
+
+Another example:
+
+```
+version = "~> 3.0"
+```
+
+This allows versions >= 3.0.0 but < 4.0.0, allowing updates to both minor and patch versions.
+
+
+
+
 Notice that for certain combinations of the version constraint you may encounter an error stating the version of the provider installed does not match the configured version.
 
 ```bash
