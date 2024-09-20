@@ -14,158 +14,150 @@ The persistent data stored in the state belongs to a Terraform workspace. Initia
 - Task 4: Changing between Workspaces
 - Task 5: Utilizing the ${terraform.workspace} interpolation sequence within your configuration
 
-## Task 1: Using Terraform Workspaces (Open Source)
 
-Terraform starts with a single workspace named "default". This workspace is special both because it is the default and also because it cannot ever be deleted. If you've never explicitly used workspaces, then you've only ever worked on the "default" workspace.
+# Exercise: Managing Multiple Environments with Terraform Workspaces
 
-You can check the Terraform workspace you are in with the `terraform workspace` command.
+**Objective**: Create a basic infrastructure (an AWS S3 bucket) and manage separate environments (`development` and `production`) using Terraform workspaces.
 
-```bash
-terraform workspace show
-default
-```
+## Step-by-Step Guide
 
-To see a list of the options you have within the terraform workspace command issue a `terraform workspace -help`
+### 1. Create a New Terraform Configuration Directory
+
+Create a new directory for your exercise and navigate into it.
 
 ```bash
-terraform workspace -help
-
-Usage: terraform [global options] workspace
-
-  new, list, show, select and delete Terraform workspaces.
-
-Subcommands:
-    delete    Delete a workspace
-    list      List Workspaces
-    new       Create a new workspace
-    select    Select a workspace
-    show      Show the name of the current workspace
+mkdir terraform-workspace-demo
+cd terraform-workspace-demo
 ```
 
-We will utilize the current `default` workspace to store the state information for our `us-west-2` aws region.
+### 2. Create a Terraform Configuration File
 
-## Task 2: Create a new Terraform Workspace for Development State
-
-Leveraging the same code base let's perform a development deployment into the `us-west-2` region while not affecting the infrastructure that was built out in our `default` workspace.
-
-To begin, let's create a new terraform workspace called `development`
-
-```bash
-terraform workspace new development
-
-Created and switched to workspace "development"!
-
-You're now on a new, empty workspace. Workspaces isolate their state, so if you run "terraform plan" Terraform will not see any existing state
-for this configuration.
-```
-
-You can validate that we are no longer in the `default` workspace by issuing a `terraform workspace show` command
-
-```bash
-terraform workspace show
-development
-```
-
-You can also see that the state is empty for this workspace by issuing a `terraform show`
-
-```bash
-terraform show
-No state.
-```
-
-## Task 3: Deploy Infrastructure within the Terraform development workspace
-
-Modify your `main.tf` to change the `region` of the aws `provider` block to `us-west-2`.
-
-`main.tf`
+Create a file named `main.tf` with the following content. This configuration creates an AWS S3 bucket with a name that includes the current workspace name.
 
 ```hcl
-# Configure the AWS Provider
-provider "aws" {
-  region = "us-west-2"
-  default_tags {
-    tags = {
-      Owner      = "Acme"
-      Provisoned = "Terraform"
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 4.0"
     }
   }
+
+  required_version = ">= 1.4.0"
+}
+
+provider "aws" {
+  region = "us-east-1"
+}
+
+resource "aws_s3_bucket" "example" {
+  bucket = "my-tf-bucket-${terraform.workspace}"
+  acl    = "private"
+}
+
+output "bucket_name" {
+  value = aws_s3_bucket.example.bucket
 }
 ```
 
-Save your file and issue a `terraform plan` to see Terraform's dry run for execution
+The S3 bucket's name includes `${terraform.workspace}`, which appends the workspace name to the bucket. This ensures that each workspace creates a unique bucket.
+
+### 3. Initialize Terraform
+
+Initialize your Terraform working directory. This downloads the required provider plugins and sets up the project.
 
 ```bash
-terraform plan
-Plan: 26 to add, 0 to change, 0 to destroy.
+terraform init
 ```
 
-Because the state information is new for the `development` workspace, Terraform will go and deploy all of the infrastructure declared in the configuration now into `us-west-2` which is our development region.
+### 4. Create and Use the Default Workspace (`default`)
+
+By default, Terraform uses the `default` workspace. Let’s first see what happens in the default workspace.
 
 ```bash
 terraform apply
-
-Do you want to perform these actions in workspace "development"?
-  Terraform will perform the actions described above.
-  Only 'yes' will be accepted to approve.
-
-  Enter a value: yes
 ```
 
-## Task 4: Changing between Workspaces
+This will create an S3 bucket named `my-tf-bucket-default`.
 
-To move between terraform workspaces you can use the `terraform workspace` command.
+### 5. Create a New Workspace for `development`
 
-To move back to the infrastructure residing in `us-west-2` issue:
+Create a new workspace named `development`.
 
 ```bash
-terraform workspace select default
+terraform workspace new development
 ```
 
-To move back to the infrastructure residing in `us-west-2` issue:
+This command creates a new workspace and switches to it.
+
+### 6. Apply Changes in the `development` Workspace
+
+Now, apply the configuration again. This will create a new S3 bucket specific to the `development` environment.
+
+```bash
+terraform apply
+```
+
+Terraform will create a bucket named `my-tf-bucket-development`.
+
+### 7. Create and Switch to the `production` Workspace
+
+Create another workspace named `production` for the production environment.
+
+```bash
+terraform workspace new production
+```
+
+You are now in the `production` workspace.
+
+### 8. Apply Changes in the `production` Workspace
+
+Apply the configuration in the `production` workspace.
+
+```bash
+terraform apply
+```
+
+Terraform will create a bucket named `my-tf-bucket-production`.
+
+### 9. List All Workspaces
+
+To see all created workspaces, use:
+
+```bash
+terraform workspace list
+```
+
+This will show `default`, `development`, and `production`, with the current workspace marked with an asterisk (`*`).
+
+### 10. Cleanup
+
+To clean up, switch to each workspace and destroy the resources:
 
 ```bash
 terraform workspace select development
+terraform destroy
+
+terraform workspace select production
+terraform destroy
+
+terraform workspace select default
+terraform destroy
 ```
 
-You can issue a `terraform show` in either workspace to see the resources that each of the workspaces is managing.
+Finally, delete the workspaces:
 
-## Task 5: Utilizing the ${terraform.workspace} interpolation sequence within your configuration
-
-Now that we see the benefit of isolating our resource state information using terraform workspaces, we may wish to reflect the workspace name information into our code base.
-
-Within your Terraform configuration, you may include the name of the current workspace using the ${terraform.workspace} interpolation sequence.
-
-Modify the environment default tag for `main.tf` inside the AWS provider to reflect the terraform workspace name
-
-```hcl
-provider "aws" {
-  region = "us-west-2"
-  default_tags {
-    tags = {
-      Environment = terraform.workspace
-      Owner       = "TF Hands On Lab"
-      Project     = "Infrastructure as Code"
-      Terraform   = "true"
-    }
-  }
-}
+```bash
+terraform workspace delete development
+terraform workspace delete production
 ```
 
-```
-  # aws_vpc.vpc will be updated in-place
-  ~ resource "aws_vpc" "vpc" {
-        id                               = "vpc-00d26110d48784808"
-      ~ tags                             = {
-          ~ "Environment" = "demo_environment" -> "development"
-            # (2 unchanged elements hidden)
-        }
-      ~ tags_all                         = {
-          ~ "Environment" = "demo_environment" -> "development"
-            # (2 unchanged elements hidden)
-        }
-        # (14 unchanged attributes hidden)
-    }
-```
+## Key Takeaways
+
+- **Separate State Files**: Each workspace manages its own state file, allowing you to manage resources independently for different environments.
+- **Environment Isolation**: By using workspaces, you can isolate environments (`development`, `production`) within the same Terraform configuration.
+- **Consistent Configuration**: You maintain the same infrastructure code while deploying to different environments, reducing duplication and errors.
+
 
 ## Reference
 
